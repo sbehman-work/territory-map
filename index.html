@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scott Behman — Territory Map</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div id="header">
+  <div>
+    <span style="font-size:15px;font-weight:600;color:#e8eaf0;letter-spacing:.3px">Scott Behman — Territory Map</span>
+    <span class="subtitle">KS &middot; MO &middot; OK &middot; TX</span>
+  </div>
+  <div class="controls">
+    <span class="ctrl-label">Color by</span>
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setColorMode('status')" id="btn-status">Status</button>
+      <button class="toggle-btn" onclick="setColorMode('system')" id="btn-system">Current System</button>
+      <button class="toggle-btn" onclick="setColorMode('budget')" id="btn-budget">Budget</button>
+    </div>
+    <span class="ctrl-label">Show</span>
+    <div class="toggle-group">
+      <button class="toggle-btn active" onclick="setTypeFilter('all')" id="btn-all">All</button>
+      <button class="toggle-btn" onclick="setTypeFilter('Customer')" id="btn-cust">Customers</button>
+      <button class="toggle-btn" onclick="setTypeFilter('Prospect')" id="btn-prosp">Prospects</button>
+    </div>
+    <input id="filter-input" type="text" placeholder="Search accounts..." oninput="onSearch(this.value)">
+    <span class="ctrl-label">Entity</span>
+    <div class="toggle-group">
+      <button class="toggle-btn active entity-btn" id="btn-city" onclick="toggleEntity('city')">City</button>
+      <button class="toggle-btn active entity-btn" id="btn-county" onclick="toggleEntity('county')">County</button>
+      <button class="toggle-btn active entity-btn" id="btn-district" onclick="toggleEntity('district')">District</button>
+    </div>
+    <span class="ctrl-label">Opportunities</span>
+    <div class="toggle-group">
+      <button class="toggle-btn" id="btn-opp-only" onclick="toggleOppFilter()">Active Only</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+    <div class="stat-pill" id="st-total">Showing: <b>—</b></div>
+    <div class="stat-pill" id="st-cust">Customers: <b>—</b></div>
+    <div class="stat-pill" id="st-prosp">Prospects: <b>—</b></div>
+    <div id="loading-pill" class="stat-pill" style="color:#f0c060">⟳ Loading...</div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="map"></div>
+  <div id="panel" class="hidden">
+    <div id="panel-header">
+      <div>
+        <div id="panel-name"></div>
+        <div id="panel-badge"></div>
+      </div>
+      <button id="close-btn" onclick="closePanel()">&times;</button>
+    </div>
+    <div id="panel-body">
+      <!-- Opportunity Section -->
+      <div id="opp-section">
+        <div class="opp-toggle-row">
+          <span class="opp-toggle-label" id="opp-toggle-label">Active Opportunity</span>
+          <label class="opp-switch">
+            <input type="checkbox" id="opp-toggle" onchange="onOppToggle()">
+            <span class="opp-slider"></span>
+          </label>
+        </div>
+        <div id="opp-url-row-content" style="display:none">
+          <hr class="opp-divider">
+          <div style="font-size:10px;color:#505770;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px">Claude Project URL</div>
+          <input id="opp-url-input" type="url" placeholder="Paste Claude Project URL (optional)...">
+          <a id="opp-project-link" href="#" target="_blank" class="hidden">&#x2197; Open Claude Project</a>
+          <button id="opp-save-btn" onclick="saveOpportunity()">Save</button>
+        </div>
+      </div>
+
+      <hr class="divider" style="margin-top:4px">
+      <div id="panel-fields"></div>
+      <hr class="divider">
+
+      <div class="field-row">
+        <div class="field-label">Notes</div>
+        <textarea id="notes-area" placeholder="Add prospecting notes..."></textarea>
+        <button id="save-btn" onclick="saveNotes()">Save Notes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="legend"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
