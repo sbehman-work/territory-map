@@ -78,3 +78,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
 .field-save-btn:hover{background:#1a4add}
 .field-cancel-btn{background:#1e2435;color:#9ba3bb;border:1px solid #2a2f3e;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .15s}
 .field-cancel-btn:hover{background:#252c3e;color:#e8eaf0}
+
+/* ── PLC filter button ── */
+.plc-btn{font-weight:600;letter-spacing:.3px}
+.plc-btn.active{background:#4caf7d;color:#fff}
+.plc-btn.active:hover{background:#3a9a6a}
