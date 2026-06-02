@@ -4,7 +4,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── State ──
-let colorMode = 'status', typeFilter = 'all', searchQuery = '', oppFilterActive = false;
+let colorMode = 'status', typeFilter = 'all', searchQuery = '', oppFilterActive = false, plcFilterActive = false;
 const entityFilter = { city: true, county: true, district: true };
 const notesCache = {};
 const oppCache = {};
@@ -91,10 +91,16 @@ function fvEditable(label, val, fieldKey, accId) {
     </div>`;
 }
 
+function isPlcAccount(acc) {
+  const p = (acc.product_summary || '').toLowerCase();
+  return p.includes('plc') || p.includes('permitting & licensing') || p.includes('permitting and licensing');
+}
+
 function isVisible(acc) {
   if (!entityFilter[acc.entity_type]) return false;
   if (typeFilter !== 'all' && acc.type !== typeFilter) return false;
   if (oppFilterActive && !(oppCache[acc.id] && oppCache[acc.id].active)) return false;
+  if (plcFilterActive && !isPlcAccount(acc)) return false;
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     if (!acc.name.toLowerCase().includes(q) && !(acc.state||'').toLowerCase().includes(q)) return false;
@@ -291,6 +297,11 @@ function toggleEntity(type) {
 function toggleOppFilter() {
   oppFilterActive = !oppFilterActive;
   document.getElementById('btn-opp-only').classList.toggle('active', oppFilterActive);
+  refreshMarkers();
+}
+function togglePlcFilter() {
+  plcFilterActive = !plcFilterActive;
+  document.getElementById('btn-plc').classList.toggle('active', plcFilterActive);
   refreshMarkers();
 }
 
