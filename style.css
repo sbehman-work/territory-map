@@ -30,6 +30,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
 #panel-body::-webkit-scrollbar-thumb{background:#2a2f3e;border-radius:2px}
 .field-row{margin-bottom:10px}
 .field-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#505770;margin-bottom:3px}
+.editable-label{display:flex;align-items:center;justify-content:space-between}
 .field-value{font-size:12px;color:#c5cad8;line-height:1.4}
 .field-value.green{color:#4caf7d;font-weight:500}
 .field-value.gold{color:#f0c060;font-weight:500}
@@ -68,3 +69,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaf
 #opp-save-btn{margin-top:8px;width:100%;padding:6px 10px;font-size:11px;border-radius:5px;border:1px solid #2a2f3e;background:#1e2435;color:#9ba3bb;cursor:pointer;font-weight:500;transition:all .15s}
 #opp-save-btn:hover{background:#252c3e;color:#e8eaf0}
 #opp-save-btn.saved{background:#1a3a2a;color:#4caf7d;border-color:#2a5a3a}
+/* ── Inline field editing ── */
+.edit-btn{background:transparent;border:none;cursor:pointer;font-size:11px;padding:0 2px;opacity:0.4;line-height:1;transition:opacity .15s;color:#9ba3bb}
+.edit-btn:hover{opacity:1;color:#e8eaf0}
+.field-input{width:100%;background:#1e2435;border:1px solid #2a2f3e;border-radius:5px;color:#e8eaf0;font-size:12px;padding:6px 9px;outline:none;font-family:inherit;margin-top:2px}
+.field-input:focus{border-color:#2c5eff}
+.field-save-btn{background:#2c5eff;color:#fff;border:none;border-radius:4px;padding:4px 12px;font-size:11px;cursor:pointer;font-weight:500;transition:background .15s}
+.field-save-btn:hover{background:#1a4add}
+.field-cancel-btn{background:#1e2435;color:#9ba3bb;border:1px solid #2a2f3e;border-radius:4px;padding:4px 10px;font-size:11px;cursor:pointer;transition:all .15s}
+.field-cancel-btn:hover{background:#252c3e;color:#e8eaf0}
