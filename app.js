@@ -70,6 +70,27 @@ function fv(label, val, cls) {
   return `<div class="field-row"><div class="field-label">${label}</div><div class="field-value ${cls||''} ${v?'':'empty'}">${v||'Not available'}</div></div>`;
 }
 
+function fvEditable(label, val, fieldKey, accId) {
+  const v = val && String(val).trim() && String(val) !== 'nan' ? String(val) : '';
+  const displayVal = v || 'Not available';
+  const isEmpty = !v;
+  return `
+    <div class="field-row">
+      <div class="field-label editable-label">
+        ${label}
+        <button class="edit-btn" onclick="startEdit('${fieldKey}')" title="Edit">✏</button>
+      </div>
+      <div class="field-value ${isEmpty ? 'empty' : ''}" id="field-display-${fieldKey}">${displayVal}</div>
+      <div id="field-edit-${fieldKey}" style="display:none">
+        <input class="field-input" id="field-input-${fieldKey}" type="text" value="${v.replace(/"/g, '&quot;')}" placeholder="Enter value...">
+        <div style="display:flex;gap:6px;margin-top:5px">
+          <button class="field-save-btn" onclick="saveField('${fieldKey}', ${accId})">Save</button>
+          <button class="field-cancel-btn" onclick="cancelEdit('${fieldKey}')">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
 function isVisible(acc) {
   if (!entityFilter[acc.entity_type]) return false;
   if (typeFilter !== 'all' && acc.type !== typeFilter) return false;
@@ -94,6 +115,39 @@ function refreshMarkers() {
   document.getElementById('st-prosp').innerHTML = `Prospects: <b>${prosp}</b>`;
 }
 
+// ── Inline field editing ──
+function startEdit(fieldKey) {
+  document.getElementById(`field-display-${fieldKey}`).style.display = 'none';
+  document.getElementById(`field-edit-${fieldKey}`).style.display = 'block';
+  document.getElementById(`field-input-${fieldKey}`).focus();
+}
+
+function cancelEdit(fieldKey) {
+  document.getElementById(`field-display-${fieldKey}`).style.display = 'block';
+  document.getElementById(`field-edit-${fieldKey}`).style.display = 'none';
+}
+
+async function saveField(fieldKey, accId) {
+  const input = document.getElementById(`field-input-${fieldKey}`);
+  const newVal = input.value.trim();
+
+  const { error } = await sb.from('accounts')
+    .update({ [fieldKey]: newVal, updated_at: new Date().toISOString() })
+    .eq('id', accId);
+
+  if (error) { alert('Save failed: ' + error.message); return; }
+
+  // Update local marker cache so refreshMarkers stays in sync
+  const entry = markers.find(m => m.acc.id === accId);
+  if (entry) entry.acc[fieldKey] = newVal;
+
+  // Update display
+  const displayEl = document.getElementById(`field-display-${fieldKey}`);
+  displayEl.textContent = newVal || 'Not available';
+  displayEl.className = 'field-value' + (newVal ? '' : ' empty');
+  cancelEdit(fieldKey);
+}
+
 // ── Panel ──
 async function openPanel(acc) {
   selectedId = acc.id;
@@ -109,12 +163,12 @@ async function openPanel(acc) {
     fv('Status', acc.type, acc.type === 'Customer' ? 'green' : ''),
     fv('Budget', fmtBudget(acc.budget), 'gold'),
     fv('Last Activity', acc.last_activity),
-    fv('OpenGov Products', acc.product_summary),
-    fv('Accounting System', acc.accounting_system),
-    fv('Budgeting Solution', acc.budgeting_solution),
-    fv('Procurement Solution', acc.procurement_solution),
-    fv('Permitting Solution', acc.permitting_solution),
-    fv('Asset Management', acc.asset_management),
+    fvEditable('OpenGov Products', acc.product_summary, 'product_summary', acc.id),
+    fvEditable('Accounting System', acc.accounting_system, 'accounting_system', acc.id),
+    fvEditable('Budgeting Solution', acc.budgeting_solution, 'budgeting_solution', acc.id),
+    fvEditable('Procurement Solution', acc.procurement_solution, 'procurement_solution', acc.id),
+    fvEditable('Permitting Solution', acc.permitting_solution, 'permitting_solution', acc.id),
+    fvEditable('Asset Management', acc.asset_management, 'asset_management', acc.id),
   ].join('');
 
   const note = notesCache[acc.id] || '';
