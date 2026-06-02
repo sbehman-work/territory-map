@@ -91,6 +91,29 @@ function fvEditable(label, val, fieldKey, accId) {
     </div>`;
 }
 
+function fvEditableLink(label, val, fieldKey, accId) {
+  const v = val && String(val).trim() && String(val) !== 'nan' ? String(val) : '';
+  const isEmpty = !v;
+  const displayHtml = v
+    ? `<a href="${v}" target="_blank" class="field-link">&#x2197; ${v}</a>`
+    : `<span class="empty">Not available</span>`;
+  return `
+    <div class="field-row">
+      <div class="field-label editable-label">
+        ${label}
+        <button class="edit-btn" onclick="startEdit('${fieldKey}')" title="Edit">✏</button>
+      </div>
+      <div id="field-display-${fieldKey}">${displayHtml}</div>
+      <div id="field-edit-${fieldKey}" style="display:none">
+        <input class="field-input" id="field-input-${fieldKey}" type="url" value="${v.replace(/"/g, '&quot;')}" placeholder="https://...">
+        <div style="display:flex;gap:6px;margin-top:5px">
+          <button class="field-save-btn" onclick="saveFieldLink('${fieldKey}', ${accId})">Save</button>
+          <button class="field-cancel-btn" onclick="cancelEdit('${fieldKey}')">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
 function isPlcAccount(acc) {
   const p = (acc.product_summary || '').toLowerCase();
   return p.includes('plc') || p.includes('permitting & licensing') || p.includes('permitting and licensing');
@@ -154,6 +177,26 @@ async function saveField(fieldKey, accId) {
   cancelEdit(fieldKey);
 }
 
+async function saveFieldLink(fieldKey, accId) {
+  const input = document.getElementById(`field-input-${fieldKey}`);
+  const newVal = input.value.trim();
+
+  const { error } = await sb.from('accounts')
+    .update({ [fieldKey]: newVal, updated_at: new Date().toISOString() })
+    .eq('id', accId);
+
+  if (error) { alert('Save failed: ' + error.message); return; }
+
+  const entry = markers.find(m => m.acc.id === accId);
+  if (entry) entry.acc[fieldKey] = newVal;
+
+  const displayEl = document.getElementById(`field-display-${fieldKey}`);
+  displayEl.innerHTML = newVal
+    ? `<a href="${newVal}" target="_blank" class="field-link">&#x2197; ${newVal}</a>`
+    : `<span class="empty">Not available</span>`;
+  cancelEdit(fieldKey);
+}
+
 // ── Panel ──
 async function openPanel(acc) {
   selectedId = acc.id;
@@ -175,6 +218,7 @@ async function openPanel(acc) {
     fvEditable('Procurement Solution', acc.procurement_solution, 'procurement_solution', acc.id),
     fvEditable('Permitting Solution', acc.permitting_solution, 'permitting_solution', acc.id),
     fvEditable('Asset Management', acc.asset_management, 'asset_management', acc.id),
+    fvEditableLink('Website', acc.website, 'website', acc.id),
   ].join('');
 
   const note = notesCache[acc.id] || '';
